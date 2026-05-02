@@ -19,12 +19,13 @@ int main(){
     curs_set(0); //hide cursor
     keypad(stdscr, TRUE); //accept arrow keys as inputs without printing to the terminal
     int score = 0; // start score
+    timeout(150); // keeps moving waitng for new input 
 
 
     int xPosition, yPosition;
     xPosition = WIDTH/2; 
     yPosition = HEIGHT/2 + 3;
-    int moveX = 0;
+    int moveX = 1;
     int moveY = 0;
     while(true){
         int keyPressed = getch();
