@@ -3,7 +3,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 //enable non canonical mode
+
+#define WIDTH 80
+#define HEIGHT 20
 
 int main(){
     struct termios tty; //struct to access termios data
@@ -14,11 +18,12 @@ int main(){
     initscr(); //start game
     curs_set(0); //hide cursor
     keypad(stdscr, TRUE); //accept arrow keys as inputs without printing to the terminal
+    int score = 0; // start score
 
 
     int xPosition, yPosition;
-    xPosition = COLS/2;
-    yPosition = LINES/2;
+    xPosition = WIDTH/2; 
+    yPosition = HEIGHT/2 + 3;
     int moveX = 0;
     int moveY = 0;
     while(true){
@@ -42,6 +47,20 @@ int main(){
         xPosition += moveX;
         yPosition += moveY;
         clear();
+        
+        char title[] = "SNAKE GAME";
+        mvprintw(1, 2, "Score: %d ", score); //displays score 
+        mvprintw(1,(WIDTH+2 - strlen(title))/2, "%s", title); // displays title
+
+        for(int x = 0; x <= WIDTH +1; x++){
+            mvaddch(3, x, '*');
+            mvaddch(HEIGHT + 4, x, '*');
+        }
+        for(int y = 3; y<= HEIGHT+4; y++){
+            mvaddch(y, 0, '*');
+            mvaddch(y, WIDTH + 1, '*');
+        }
+
         move(yPosition,xPosition);
         addch('@');
         refresh();
