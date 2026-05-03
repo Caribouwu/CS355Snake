@@ -9,6 +9,14 @@
 #define WIDTH 80
 #define HEIGHT 20
 
+int hitwall(int xPosition, int yPosition){ //function for if snake hits a wall
+    if(xPosition <= 0 || xPosition >= WIDTH +1){
+        return 1;
+    }else if(yPosition <= 3 || yPosition >= HEIGHT + 4){
+        return 1;
+    }
+    return 0;
+}
 int main(){
     struct termios tty; //struct to access termios data
     tcgetattr(STDIN_FILENO, &tty); //get attributes for the terminal
@@ -47,6 +55,10 @@ int main(){
         }
         xPosition += moveX;
         yPosition += moveY;
+
+        if(hitwall(xPosition, yPosition)){
+            break;
+        }
         clear();
         
         char title[] = "SNAKE GAME";
@@ -66,7 +78,8 @@ int main(){
         addch('@');
         refresh();
     }
-
-    endwin();
+    clear();
+    mvprintw(WIDTH/ 2, HEIGHT/ 2, "GAME OVER");
+    refresh();
     return 0;
 }
