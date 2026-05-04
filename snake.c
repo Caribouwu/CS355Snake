@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-//enable non canonical mode
 
 #define WIDTH 80
 #define HEIGHT 20
 
+//prototypes
 int collision(int xPosition,int yPosition, int snakeLength);
 void slither(int xPosition,int yPosition, int snakeLength);
 void generateFruit(int xPosition,int yPosition, int *snakeLength);
@@ -18,9 +18,8 @@ void generateFruit(int xPosition,int yPosition, int *snakeLength);
 int fruitX,fruitY; 
 bool checkFruit = false;
 int score = 0; // start score
-int snakeSegmentX[(WIDTH*4)/2];
-int snakeSegmentY[(WIDTH*4)/2];
-
+int snakeSegmentX[WIDTH*2];
+int snakeSegmentY[WIDTH*2];
 
 
 
@@ -32,38 +31,59 @@ int main(){
     tcsetattr(STDIN_FILENO, TCSANOW, &tty); //apply changes
     initscr(); //start game
     curs_set(0); //hide cursor
-    //score was here
-    keypad(stdscr, TRUE); //accept arrow keys as inputs without printing to the terminal
-    timeout(150); // keeps moving waitng for new input 
-    
+    keypad(stdscr, TRUE); //accept arrow keys as inputs without printing to the terminal  
+    timeout(250); // keeps moving waitng for new input 
     int xPosition, yPosition;
     xPosition = WIDTH/2; 
     yPosition = HEIGHT/2 + 3;   //place to spawn snake
-    int snakeLength = 1;
-    int fruitx = rand() % (WIDTH - 2) + 1;
-    int fruity = rand() % (HEIGHT - 2) + 1;
+    int snakeLength = 3;
+    //coordinates to spawn fruit with arena bounds
+    fruitX = (rand() % WIDTH) + 1;
+    fruitY = (rand() % HEIGHT) + 4;
+    
+    //snake head
     snakeSegmentX[0] = xPosition;
     snakeSegmentY[0] = yPosition;
-
-
-
+    
+    
+    
     int moveX = 1; //default direction
     int moveY = 0;
+    
+    //all directional arrow keys are eligible to be pressed
+    bool kdown = true;
+    bool kup = true;
+    bool kleft = false; //starting direction is moving right
+    bool kright = true;
+    
+    
     while(true){
         int keyPressed = getch(); //get input
-        if(keyPressed == KEY_UP){
+        if(keyPressed == KEY_UP && (kup == true)){
+            kdown = false;
+            kleft = true;
+            kright = true;
             moveX = 0;
             moveY = -1;
         }
-        if(keyPressed == KEY_DOWN){
+        if(keyPressed == KEY_DOWN && (kdown == true)){
+            kup = false;
+            kleft = true;
+            kright = true;
             moveX = 0;
             moveY = 1;
         }
-        if(keyPressed == KEY_LEFT){
+        if(keyPressed == KEY_LEFT && (kleft == true)){
+            kright = false;
+            kup = true;
+            kdown = true;
             moveX = -1;
             moveY = 0;
         }
-        if(keyPressed == KEY_RIGHT){
+        if(keyPressed == KEY_RIGHT && (kright == true)){
+            kleft = false;
+            kup = true;
+            kdown = true;
             moveX = 1;
             moveY = 0;
         }
@@ -87,15 +107,23 @@ int main(){
             mvaddch(y, 0, '*');
             mvaddch(y, WIDTH + 1, '*');
         }
-        
+
         generateFruit(xPosition,yPosition, &snakeLength);
         slither(xPosition,yPosition, snakeLength);
         refresh();
+
+        if(snakeLength >= 8 && snakeLength < 18){ //snake movement speedup at size 8
+            timeout(175);
+        }
+        if(snakeLength >= 18){
+            timeout(100);
+        }
+
     }
     clear();
-    mvprintw(WIDTH/ 2, HEIGHT/ 2, "GAME OVER");
     refresh();
-    return 0;
+    endwin();
+    return 1;
 }
 
 
@@ -140,8 +168,8 @@ void generateFruit(int xPosition, int yPosition, int *snakeLength){
     //spawns in fruit
     while(!checkFruit){ //loop used to bruteforce a random fruit placement
         //find a random x/y coordinates in game field
-        fruitX = (rand() % WIDTH)+ 3; //3, height+4
-        fruitY = (rand() % HEIGHT+3)+ 1; //1, width+1
+        fruitX = (rand() % WIDTH) + 1;  
+        fruitY = (rand() % HEIGHT) + 4;
         //get the character from a location on screen, to see if the fruit will spawn inside the snake
         chtype ch = mvinch(fruitY, fruitX);
         char charAt = ch & A_CHARTEXT;
@@ -155,7 +183,7 @@ void generateFruit(int xPosition, int yPosition, int *snakeLength){
         //snake eats fruit
         (*snakeLength)++; //increase snake length
         checkFruit = false; //another fruit can now be generated
-        score+= 10; //increase score
+        score+= 1; //increase score
     }
 }
 
