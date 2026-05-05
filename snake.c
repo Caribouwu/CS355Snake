@@ -126,13 +126,13 @@ int main(){
     }
     clear();
     if(lose){
-        mvprintw(HEIGHT/2, WIDTH/2 - 5, "GAME OVER");// game over message in the middle 
+        mvprintw(LINES/2, COLS/2 - 5, "GAME OVER");// game over message in the center 
     }if(win){
-        mvprintw(HEIGHT/2, WIDTH/2 - 4, "YOU WIN!");// win message in the middle
+        mvprintw(LINES/2, COLS/2 - 4, "YOU WIN!");// win message in the center
     }
     refresh();
+    timeout(-1);
     getch();
-    sleep(3);
     endwin();
     return 1;
 }
