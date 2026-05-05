@@ -6,7 +6,7 @@
 #include <string.h>
 #include <math.h>
 
-#define WIDTH 80
+#define WIDTH 80 //reusable constants 
 #define HEIGHT 20
 
 //prototypes
@@ -17,11 +17,11 @@ void generateFruit(int xPosition,int yPosition, int *snakeLength);
 //global variables !!
 int fruitX,fruitY; 
 bool checkFruit = false;
+bool win = false;
+bool lose = false;
 int score = 0; // start score
 int snakeSegmentX[WIDTH*2];
 int snakeSegmentY[WIDTH*2];
-
-
 
 int main(){
     struct termios tty; //struct to access termios data
@@ -91,21 +91,25 @@ int main(){
         yPosition += moveY;
         
         if(collision(xPosition, yPosition, snakeLength)){
+            lose = true; // Game over screen 
+            break;
+        }if(snakeLength >= 100){
+            win = true; // Winner winner!
             break;
         }
         clear();
         
         char title[] = "SNAKE GAME";
-        mvprintw(1, 2, "Score: %d ", score); //displays score 
-        mvprintw(1,(WIDTH+2 - strlen(title))/2, "%s", title); // displays title
+        mvprintw(1, 2, "Score: %d ", score); //displays score in the corner left
+        mvprintw(1,(WIDTH+2 - strlen(title))/2, "%s", title); // displays title in the middle
         
         for(int x = 0; x <= WIDTH +1; x++){
-            mvaddch(3, x, '*');
-            mvaddch(HEIGHT + 4, x, '*');
+            mvaddch(3, x, '*');// top wall
+            mvaddch(HEIGHT + 4, x, '*');// bottom wall
         }
         for(int y = 3; y<= HEIGHT+4; y++){
-            mvaddch(y, 0, '*');
-            mvaddch(y, WIDTH + 1, '*');
+            mvaddch(y, 0, '*');// left wall
+            mvaddch(y, WIDTH + 1, '*');// right wall
         }
 
         generateFruit(xPosition,yPosition, &snakeLength);
@@ -121,7 +125,14 @@ int main(){
 
     }
     clear();
+    if(lose){
+        mvprintw(LINES/2, COLS/2 - 5, "GAME OVER");// game over message in the center 
+    }if(win){
+        mvprintw(LINES/2, COLS/2 - 4, "YOU WIN!");// win message in the center
+    }
     refresh();
+    timeout(-1);
+    getch();
     endwin();
     return 1;
 }
@@ -187,12 +198,10 @@ void generateFruit(int xPosition, int yPosition, int *snakeLength){
     }
 }
 
-
-
 int collision(int xPosition, int yPosition, int snakeLength){ //function for if snake hits a wall
-    if(xPosition <= 0 || xPosition >= WIDTH +1){
+    if(xPosition <= 0 || xPosition >= WIDTH +1){//if snake hits left or right wall then end game
         return 1;
-    }else if(yPosition <= 3 || yPosition >= HEIGHT + 4){
+    }else if(yPosition <= 3 || yPosition >= HEIGHT + 4){// if snake hits top or bottom wall end game
         return 1;
     }
     for(int i = 1; i<snakeLength; i++){ //loop through each snake segment
